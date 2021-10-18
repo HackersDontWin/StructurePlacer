@@ -1,0 +1,5 @@
+name: StructurePlacer
+main: net.hackersdontwin.structureplacer.StructurePlacer
+version: 1.0
+api-version: 1.17
+author: HackersDontWin

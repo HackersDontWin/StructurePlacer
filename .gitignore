@@ -1,0 +1,9 @@
+
+.idea/artifacts/StructurePlacer.xml
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/vcs.xml
+*.class
+target/classes/plugin.yml
+StructurePlacer.iml
