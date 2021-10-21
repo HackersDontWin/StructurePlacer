@@ -1,12 +1,9 @@
 package net.hackersdontwin.structureplacer.events;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
 import net.hackersdontwin.structureplacer.StructurePlacer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,19 +11,50 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 public class PlayerLook implements Listener {
 
+	private StructurePlacer plugin;
+	private final int DISTANCE = 20;
+
+	public PlayerLook(StructurePlacer plugin) {
+		this.plugin = plugin;
+	}
+
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 
-		if(StructurePlacer.playerBlocks.containsKey(player) && (player.getLocation().distance(StructurePlacer.playerBlocks.get(player)) > 5 || player.getTargetBlockExact(5) == null || player.getTargetBlockExact(5).getType() == Material.AIR)) {
-			player.sendBlockChange(StructurePlacer.playerBlocks.get(player), Material.AIR.createBlockData());
+		if(player.getTargetBlock(null, DISTANCE) == null || player.getTargetBlock(null, DISTANCE).getType() == Material.AIR) {
+			plugin.getStructureManager().clearPreviousPlacedStructure(player);
 		}
-		if(player.getTargetBlockExact(5) != null && player.getTargetBlockExact(5).getType() != null && player.getTargetBlockExact(5).getType() != Material.AIR) {
+		if(player.getTargetBlock(null, DISTANCE) != null && player.getTargetBlock(null, DISTANCE) != null && player.getTargetBlock(null, DISTANCE).getType() != Material.AIR) {
 			if(player.getInventory().getItemInMainHand().getType() == Material.NETHER_STAR) {
-				if(StructurePlacer.playerBlocks.containsKey(player)) {
-					player.sendBlockChange(StructurePlacer.playerBlocks.get(player), Material.AIR.createBlockData());
+				Location lookLocation = player.getTargetBlock(null, DISTANCE).getLocation();
+
+				if(player.getTargetBlock(null, DISTANCE).getType() != Material.GRASS) {
+					lookLocation.setY(lookLocation.getY() + 1);
 				}
-				StructurePlacer.placeGhostBlock(player);
+
+				String orientation = "FORWARDS";
+				// When player is looking forwards (Do nothing, this is the same as the .structure file)
+				if((player.getLocation().getYaw() >= 135f && player.getLocation().getYaw() <= 180.0f) || (player.getLocation().getYaw() >= -180.0f && player.getLocation().getYaw() <= -135.0f)) {
+					orientation = "FORWARDS";
+				}
+
+				// When player is looking backwards
+				if(player.getLocation().getYaw() >= -45.0f && player.getLocation().getYaw() <= 45.0f) {
+					orientation = "BACKWARDS";
+				}
+
+				// When player is looking to the right
+				if(player.getLocation().getYaw() > 45.0f && player.getLocation().getYaw() < 135.0f) {
+					orientation = "RIGHT";
+				}
+
+				// When player is looking to the left
+				if(player.getLocation().getYaw() > -135.0f && player.getLocation().getYaw() < -45.0f) {
+					orientation = "LEFT";
+				}
+
+				plugin.getStructureManager().showStructure(player, lookLocation, "mystructure", orientation);
 			}
 		}
 	}

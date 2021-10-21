@@ -1,37 +1,32 @@
 package net.hackersdontwin.structureplacer;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.hackersdontwin.structureplacer.events.PlayerItemSwitch;
 import net.hackersdontwin.structureplacer.events.PlayerLook;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public class StructurePlacer extends JavaPlugin {
 
-	private ProtocolManager protocolManager;
-	public static Map<Player, Location> playerBlocks = new HashMap<>();
+	private Gson gson;
+	private StructureManager structureManager;
 
 	@Override
 	public void onEnable() {
-		protocolManager = ProtocolLibrary.getProtocolManager();
+		this.gson = new GsonBuilder().setPrettyPrinting().create();
+		this.structureManager = new StructureManager(this);
 
-		Bukkit.getPluginManager().registerEvents(new PlayerLook(), this);
-		Bukkit.getPluginManager().registerEvents(new PlayerItemSwitch(), this);
+		Bukkit.getPluginManager().registerEvents(new PlayerLook(this), this);
+		Bukkit.getPluginManager().registerEvents(new PlayerItemSwitch(this), this);
 	}
 
-	public static void placeGhostBlock(Player player) {
-		Location location = player.getTargetBlockExact(5).getLocation();
-		if(player.getTargetBlockExact(5).getType() != Material.GRASS) {
-			location.setY(location.getY() + 1);
-		}
-		player.sendBlockChange(location, Material.STONE.createBlockData());
-		StructurePlacer.playerBlocks.put(player, location);
+	public Gson getGson() {
+		return gson;
+	}
+
+	public StructureManager getStructureManager() {
+		return structureManager;
 	}
 }
